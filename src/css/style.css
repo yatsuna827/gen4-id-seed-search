@@ -17,7 +17,7 @@ hr {
   margin-top: 20px;
   margin-bottom: 20px;
 }
-input[type="number"] {
+input[type="number"],input[type="text"] {
   font-size: 14px;
   color: #555;
   padding-left: 6px;
@@ -54,7 +54,7 @@ button {
   outline: none;
   appearance: none;
 
-  width: 120px;
+  width: 150px;
   border-radius: 10px;
   padding: 10px 25px;
   font-weight: 500;
@@ -92,25 +92,15 @@ button:disabled {
 input.ivs {
   width: 64px;
 }
-#id-input, #nature-select {
+.id-input {
   width: 120px;
-}
-#search-max {
-  width: 150px;
-}
-
-#versions, #versions label, #versions input {
-  cursor: pointer;
-}
-#versions input {
-  margin-right: 5px;
 }
 
 #buttons-container {
   margin-top: 10px;
 }
 
-#start-button {
+.start-button {
   color: white;
   font-size: 16px;
   font-weight: 600;

@@ -1,7 +1,7 @@
 import type { Config } from './types'
 export const config: Config = {
   getUrl: {
-    dev: (id, version) => `http://localhost:8080/${version}/${id}`,
-    prod: (id, version) => `https://jyk6mdg08i.execute-api.ap-northeast-1.amazonaws.com/rng/gen7/tsvsupport?version=${version}&g7tid=${id}`,
+    dev: (tid, val, mode) => `http://localhost:8080/${tid}/${mode}/${val}`,
+    prod: (tid, val, mode) => `https://3nmpb89fj2.execute-api.ap-northeast-1.amazonaws.com/default/gen4-id-seed/from-${mode}?tid=${tid}&${mode}=${val}`,
   },
 }

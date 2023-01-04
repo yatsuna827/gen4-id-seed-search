@@ -1,8 +1,10 @@
 import { getUrl } from './getUrl.js'
 
-const getValue = (el: HTMLInputElement) => (el.checkValidity() ? Number(el.value) : null)
-const getID = () => getValue(document.getElementById('id-input'))?.toString().padStart(6, '0')
-const getIVs = () => (['h', 'a', 'b', 'c', 'd', 's'] as const).map((_) => getValue(document.getElementById(`ivs-${_}`)))
+const getValue = <T = string>(el: HTMLInputElement, f?: (value: string) => T) => (el.checkValidity() ? (f ? f(el.value) : el.value) : null)
+const getTID = () => getValue(document.getElementById('tid-input'), Number)?.toString().padStart(5, '0')
+const getSID = () => getValue(document.getElementById('sid-input'), Number)?.toString().padStart(5, '0')
+const getPID = () => getValue(document.getElementById('pid-input'))?.padStart(8, '0')
+
 const addRow = (txt: string, onClick?: () => void) => {
   const div = document.createElement('div')
   const classes = ['message', 'card']
@@ -23,89 +25,59 @@ const scrollToBottom = () => {
   })
 }
 
-type Result = {
-  seed: string
-  index: number
-  tsv: number
-  trv: string
-}
-
-let worker: Worker | null = null
-const createWorker = (id: string) => {
-  worker = new Worker('./js/worker.js')
-  let found = false
-  worker.addEventListener('message', (e) => {
-    if (e.data === 'completed') {
-      document.getElementById('start-button').removeAttribute('disabled')
-      addRow('計算を終了しました')
-      if (found) {
-        addRow('結果をクリック/タップするとツイートできます')
-      }
-    } else {
-      found = true
-      const { seed, index, tsv, trv } = e.data as Result
-      addRow(`${seed} ${index}[F] tsv=${tsv} trv=${trv}`, () => {
-        const tweet = `ID ${id} のセーブデータのTSVを特定したよ！ seed=${seed} TSV=${tsv} TRV=${trv}`
-        const shareURL = `https://twitter.com/intent/tweet?text=${tweet}`
-        window.open(shareURL)
-      })
-    }
-  })
-
-  return worker
-}
-
-const fetchSeedList = async (id: string, version: 'sm' | 'usum'): Promise<number[]> => {
-  const url = getUrl(id, version)
+const fetchSeedList = async (tid: string, arg: string, mode: 'pid' | 'sid'): Promise<number[]> => {
+  const url = getUrl(tid, arg, mode)
   return fetch(url).then((res) => {
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
     return res.json()
   })
 }
 
-const run = async () => {
-  document.getElementById('start-button').setAttribute('disabled', 'true')
+const runSID = async () => {
+  const tid = getTID()
+  if (tid == null) return alert('TIDの入力にエラーがあります')
+  const sid = getSID()
+  if (sid == null) return alert('SIDの入力にエラーがあります')
 
-  const version = document.getElementById('ver-sm').checked ? 'sm' : 'usum'
-
-  const id = getID()
-  if (id == null) return alert('IDの入力にエラーがあります')
-
-  const ivs = getIVs()
-  if (ivs.includes(null)) return alert('個体値の入力にエラーがあります')
-
-  const nature = Number(document.getElementById('nature-select').value)
-
-  const max = getValue(document.getElementById('search-max'))
-  if (max == null) return alert('上限の入力にエラーがあります')
-
-  fetchSeedList(id, version)
+  document.getElementById('start-button-sid').setAttribute('disabled', 'true')
+  fetchSeedList(tid, sid, "sid")
     .then((seedList) => {
-      createWorker(id).postMessage({
-        method: 'start',
-        version,
-        ivs,
-        nature,
-        seedList,
-        max,
-      })
-      addRow('計算を開始しました')
+      addRow(`TID: ${tid} SID: ${sid} 検索結果: ${seedList.length}件`)
+      for (const seed of seedList.map(_ => _.toString(16).padStart(8, "0"))) {
+        addRow(`${seed}`)
+      }
     })
     .catch((e) => {
-      alert('seedリストの取得に失敗しました (・ω<)')
+      alert('通信に失敗しました (・ω<)')
       console.log(e)
-      document.getElementById('start-button').removeAttribute('disabled')
+    })
+    .finally(() => {
+      document.getElementById('start-button-sid').removeAttribute('disabled')
     })
 }
-const cancel = () => {
-  if (worker) {
-    worker.terminate()
-    worker = null
 
-    document.getElementById('start-button').removeAttribute('disabled')
-    addRow('計算を中止しました')
-  }
+const runPID = async () => {
+  const tid = getTID()
+  if (tid == null) return alert('TIDの入力にエラーがあります')
+  const pid = getPID()
+  if (pid == null) return alert('PIDの入力にエラーがあります')
+
+  document.getElementById('start-button-pid').setAttribute('disabled', 'true')
+  fetchSeedList(tid, pid, "pid")
+    .then((seedList) => {
+      addRow(`TID: ${tid} PID: ${pid} 検索結果: ${seedList.length}件`)
+      for (const seed of seedList.map(_ => _.toString(16).padStart(8, "0"))) {
+        addRow(`${seed}`)
+      }
+    })
+    .catch((e) => {
+      alert('通信に失敗しました (・ω<)')
+      console.log(e)
+    })
+    .finally(() => {
+      document.getElementById('start-button-pid').removeAttribute('disabled')
+    })
 }
 
-document.getElementById('start-button').onclick = run
-document.getElementById('cancel-button').onclick = cancel
+document.getElementById('start-button-sid').onclick = runSID
+document.getElementById('start-button-pid').onclick = runPID

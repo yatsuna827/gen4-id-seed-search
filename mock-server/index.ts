@@ -19,26 +19,15 @@ try {
 
 const api = express()
 api.use(cors())
-api.get('/:ver/:id', (req, res) => {
-  const { id, ver } = req.params
-  const path = `./mock-server/data/${ver}/${id.padStart(6, '0')}.json`
-  let data: string | undefined = undefined
+api.get('/:tid/pid/:pid', (req, res) => {
+  const { tid, pid } = req.params
 
-  if (
-    !['sm', 'usum'].includes(ver) ||
-    !/\d{1,6}/.test(id) ||
-    !existsSync(path)
-  ) {
-    res.status(404)
-  } else {
-    try {
-      data = JSON.parse(readFileSync(path, 'utf-8'))
-    } catch {
-      res.status(500)
-    }
-  }
+  res.json([0xBEEFFACE, 0xCAFEEE])
+})
+api.get('/:tid/sid/:sid', (req, res) => {
+  const { tid, sid } = req.params
 
-  res.json(data)
+  res.json([0])
 })
 
 try {

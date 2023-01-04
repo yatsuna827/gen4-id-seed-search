@@ -3,5 +3,5 @@ export type ConfigItem<T> = {
   [key in ENV]: T
 }
 export type Config = {
-  getUrl: ConfigItem<(id: string, version: 'sm' | 'usum') => string>
+  getUrl: ConfigItem<(tid: string, arg: string, mode: 'sid' | 'pid') => string>
 }

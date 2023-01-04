@@ -1,3 +1,3 @@
 declare module '*/getUrl.js' {
-  export const getUrl: (id: string, version: 'sm' | 'usum') => string
+  export const getUrl: (tid: string, arg: string, mode: 'sid' | 'pid') => string
 }
