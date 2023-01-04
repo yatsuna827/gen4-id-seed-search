@@ -68,7 +68,7 @@ const searchFromPID = async () => {
   const pid = getPID()
   if (pid == null) return alert('PIDの入力にエラーがあります')
 
-  fetchSeedList(tid, pid, "pid")
+  await fetchSeedList(tid, pid, "pid")
     .then((seedList) => {
       addRow(`TID: ${tid} PID: ${pid} 検索結果: ${seedList.length}件`)
       for (const seed of seedList.map(_ => _.toString(16).padStart(8, "0"))) {
