@@ -33,55 +33,53 @@ const fetchSeedList = async (tid: string, arg: string, mode: 'pid' | 'sid'): Pro
   })
 }
 
-const runSID = async () => {
+const makeRun = (main: () => Promise<void>) => async () => {
+  document.getElementById('start-button-pid').setAttribute('disabled', 'true')
+  document.getElementById('start-button-sid').setAttribute('disabled', 'true')
+
+  await main()
+
+  document.getElementById('start-button-pid').removeAttribute('disabled')
+  document.getElementById('start-button-sid').removeAttribute('disabled')
+}
+
+const searchFromSID = async () => {
   const tid = getTID()
   if (tid == null) return alert('TIDの入力にエラーがあります')
   const sid = getSID()
   if (sid == null) return alert('SIDの入力にエラーがあります')
 
-  document.getElementById('start-button-pid').setAttribute('disabled', 'true')
-  document.getElementById('start-button-sid').setAttribute('disabled', 'true')
-  fetchSeedList(tid, sid, "sid")
+  await fetchSeedList(tid, sid, "sid")
     .then((seedList) => {
       addRow(`TID: ${tid} SID: ${sid} 検索結果: ${seedList.length}件`)
       for (const seed of seedList.map(_ => _.toString(16).padStart(8, "0"))) {
-        addRow(`${seed}`)
+        addRow(seed)
       }
     })
     .catch((e) => {
       alert('通信に失敗しました (・ω<)')
       console.log(e)
     })
-    .finally(() => {
-      document.getElementById('start-button-pid').removeAttribute('disabled')
-      document.getElementById('start-button-sid').removeAttribute('disabled')
-    })
 }
 
-const runPID = async () => {
+const searchFromPID = async () => {
   const tid = getTID()
   if (tid == null) return alert('TIDの入力にエラーがあります')
   const pid = getPID()
   if (pid == null) return alert('PIDの入力にエラーがあります')
 
-  document.getElementById('start-button-pid').setAttribute('disabled', 'true')
-  document.getElementById('start-button-sid').setAttribute('disabled', 'true')
   fetchSeedList(tid, pid, "pid")
     .then((seedList) => {
       addRow(`TID: ${tid} PID: ${pid} 検索結果: ${seedList.length}件`)
       for (const seed of seedList.map(_ => _.toString(16).padStart(8, "0"))) {
-        addRow(`${seed}`)
+        addRow(seed)
       }
     })
     .catch((e) => {
       alert('通信に失敗しました (・ω<)')
       console.log(e)
     })
-    .finally(() => {
-      document.getElementById('start-button-pid').removeAttribute('disabled')
-      document.getElementById('start-button-sid').removeAttribute('disabled')
-    })
 }
 
-document.getElementById('start-button-sid').onclick = runSID
-document.getElementById('start-button-pid').onclick = runPID
+document.getElementById('start-button-sid').onclick = makeRun(searchFromSID)
+document.getElementById('start-button-pid').onclick = makeRun(searchFromPID)
