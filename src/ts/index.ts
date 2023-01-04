@@ -39,6 +39,7 @@ const runSID = async () => {
   const sid = getSID()
   if (sid == null) return alert('SIDの入力にエラーがあります')
 
+  document.getElementById('start-button-pid').setAttribute('disabled', 'true')
   document.getElementById('start-button-sid').setAttribute('disabled', 'true')
   fetchSeedList(tid, sid, "sid")
     .then((seedList) => {
@@ -52,6 +53,7 @@ const runSID = async () => {
       console.log(e)
     })
     .finally(() => {
+      document.getElementById('start-button-pid').removeAttribute('disabled')
       document.getElementById('start-button-sid').removeAttribute('disabled')
     })
 }
@@ -63,6 +65,7 @@ const runPID = async () => {
   if (pid == null) return alert('PIDの入力にエラーがあります')
 
   document.getElementById('start-button-pid').setAttribute('disabled', 'true')
+  document.getElementById('start-button-sid').setAttribute('disabled', 'true')
   fetchSeedList(tid, pid, "pid")
     .then((seedList) => {
       addRow(`TID: ${tid} PID: ${pid} 検索結果: ${seedList.length}件`)
@@ -76,6 +79,7 @@ const runPID = async () => {
     })
     .finally(() => {
       document.getElementById('start-button-pid').removeAttribute('disabled')
+      document.getElementById('start-button-sid').removeAttribute('disabled')
     })
 }
 
